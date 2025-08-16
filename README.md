@@ -38,7 +38,11 @@ It is designed for Plasma panels and works great both on desktops and docks.
    ```bash
    kpackagetool5 -t Plasma/Applet -i .
 
+or
 
+   **Plasma 6:**
+   ```bash
+   kpackagetool6 -t Plasma/Applet -i .
 
 
 
