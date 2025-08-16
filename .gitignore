@@ -1,39 +1,31 @@
+# KDE/Plasma & editores
+*.kcache
+*.kate-swp
+*.swp
 *~
-.*
-!.arcconfig
-!.gitignore
-# Ignore hidden files
-.directory
+.#*
+*.orig
 
-# build directory
+# Archivos temporales comunes
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Comprimidos/paquetes que generes para publicar
+*.tar
+*.tar.gz
+*.zip
+
+# Node/Frontend (por si en el futuro agregás tooling)
+node_modules/
+dist/
 build/
 
-# backup files
-*.autosave
-*.desktop~
-*.gitignore~
-*.js~
-*.kate-swp
-*.qml~
-*.sh~
-*.xml~
-.*.cpp~
-.*.h~
-.*.js~
-.*.pot~
-.*.po~
-.*.qml~
-.*.txt~
-.*.xml~
-.*~
-*.*.user
-*.*.orig
+# Python (si llegás a usar scripts auxiliares)
+__pycache__/
+*.pyc
+*.pyo
 
-# locale files
-*.mo
-
-# KDevelop Project files
-*.kdev4
-.kdev4/
-
-build-kdev/
+# Logs
+*.log
+logs/
