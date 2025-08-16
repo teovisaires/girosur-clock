@@ -8,7 +8,7 @@
 It is designed for Plasma panels and works great both on desktops and docks.
 
 <p align="center">
-  <img src="contents/images/screenshot-1.png" width="580"><br/>
+  <img src="contents/images/screenshot-1.png" width="640"><br/>
   <i>Inverted numbering layout and counterclockwise rotation</i>
 </p>
 
