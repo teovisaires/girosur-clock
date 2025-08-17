@@ -17,12 +17,12 @@ It is designed for Plasma panels and works great both on desktops and docks.
 - ⏱️ **True counterclockwise rotation** (seconds, minutes and hour hands).  
 - 🔢 **Inverted numbering** consistent with the counterclockwise design.  
 - 🗺️ **“South-up” map background** as SVG.  
-- 🖥️ **Plasma 5 and 6 compatibility**.  
+- 🖥️ **Plasma 5 compatibility**.  
 - 🧩 **Works on panels and docks** (tested with Latte).  
 
 ## Requirements
 
-- KDE Plasma 5.24+ or Plasma 6.x  
+- KDE Plasma 5.24+ 
 - Qt / KDE Frameworks (depending on your distribution)  
 - Plasma package tools (`kpackagetool5` or `kpackagetool6`)  
 
@@ -38,11 +38,7 @@ It is designed for Plasma panels and works great both on desktops and docks.
    ```bash
    kpackagetool5 -t Plasma/Applet -i .
 
-or
 
-   **Plasma 6:**
-   ```bash
-   kpackagetool6 -t Plasma/Applet -i .
 
 
 
