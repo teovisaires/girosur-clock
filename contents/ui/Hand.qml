@@ -22,8 +22,8 @@
  */
 
 import QtQuick 2.0
-
 import org.kde.plasma.core 2.0 as PlasmaCore
+import QtGraphicalEffects 1.0
 
 PlasmaCore.SvgItem {
     id: handRoot
@@ -61,7 +61,25 @@ PlasmaCore.SvgItem {
         leftMargin: -horizontalRotationCenter + horizontalRotationOffset
     }
 
-    svg: clockSvg
+    // —— ÚNICO CAMBIO: apuntar a images/clock.svg dentro del paquete ——
+    svg: PlasmaCore.Svg {
+        id: localClockSvg
+        imagePath: plasmoid.file("images", "clock.svg")
+        multipleImages: true
+    }
+
+    layer.enabled: true
+    layer.effect: DropShadow {
+        id: handGlow
+        transparentBorder: true
+        color: Qt.rgba(1, 1, 1, 0.4) // Subtle white glow
+        radius: 8
+        samples: 16
+        horizontalOffset: 0
+        verticalOffset: 0
+        visible: !handRoot.elementId.includes("Shadow") // Only glow for the hands, not their shadows
+    }
+
     transform: Rotation {
         id: rotation
         angle: 0
@@ -72,10 +90,10 @@ PlasmaCore.SvgItem {
         Behavior on angle {
             RotationAnimation {
                 id: anim
-                duration: 200
+                duration: 400 // Slightly slower for more elegance
                 direction: RotationAnimation.AntiClockwise
-                easing.type: Easing.OutElastic
-                easing.overshoot: 0.5
+                easing.type: Easing.OutBack // More "mechanical" feel with a slight overshoot
+                easing.overshoot: 0.3
             }
         }
     }

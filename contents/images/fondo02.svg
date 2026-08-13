@@ -8,7 +8,7 @@
    version="1.1"
    id="svg5"
    xml:space="preserve"
-   sodipodi:docname="fondo01.svg"
+   sodipodi:docname="fondo02.svg"
    inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -48,9 +48,7 @@
        inkscape:groupmode="layer"
        id="layer2"
        inkscape:label="fondo circular"
-       transform="translate(0.14063457,0.66528332)"
-       sodipodi:insensitive="true"
-       style="display:none"><ellipse
+       transform="translate(0.14063457,0.66528332)"><ellipse
          style="fill:#f4eed7;stroke-width:0.33759"
          id="path281"
          cx="-44.175598"

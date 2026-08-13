@@ -22,6 +22,9 @@
     <entry name="circleStyle" type="Bool">
         <default>true</default>
     </entry>
+    <entry name="backgroundSource" type="String">
+        <default>fondo06.svg</default>
+    </entry>
   </group>
 
 </kcfg>

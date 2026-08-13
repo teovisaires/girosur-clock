@@ -27,7 +27,6 @@ import org.kde.plasma.calendar 2.0 as PlasmaCalendar
 import QtQuick.Layouts 1.1
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 3.0 as PlasmaComponents
-
 import "calendar" as LocalCalendar
 import "."
 
@@ -43,8 +42,14 @@ Item {
     property bool showTimezone: plasmoid.configuration.showTimezoneString
     property int tzOffset
 
+    // ---- System State & Stabilization ----
+    // Used to prevent visual glitches after system suspension or session changes.
+    property bool settling: false
+    property double _lastTickMs: 0
+
     Plasmoid.backgroundHints: "NoBackground"
     Plasmoid.preferredRepresentation: Plasmoid.compactRepresentation
+
     Plasmoid.toolTipMainText: Qt.formatDate(dataSource.data["Local"]["DateTime"], "dddd")
     Plasmoid.toolTipSubText: Qt.formatDate(
         dataSource.data["Local"]["DateTime"],
@@ -56,7 +61,9 @@ Item {
         engine: "time"
         connectedSources: "Local"
         interval: showSecondsHand ? 1000 : 30000
+
         onDataChanged: {
+            if (girosurclock.settling) return;   // durante la estabilización, ignoramos el tick
             var date = new Date(data["Local"]["DateTime"])
             hours = date.getHours()
             minutes = date.getMinutes()
@@ -76,7 +83,48 @@ Item {
     Component.onCompleted: {
         tzOffset = new Date().getTimezoneOffset()
         dataSource.onDataChanged.connect(dateTimeChanged)
+        _lastTickMs = Date.now()
     }
+
+    // Detector sencillo de reanudación: si el salto entre checks > 3s, asumimos vuelta de suspensión
+    Timer {
+        id: resumeDetector
+        interval: 1000
+        running: true
+        repeat: true
+        onTriggered: {
+            var now = Date.now()
+            var delta = now - girosurclock._lastTickMs
+            girosurclock._lastTickMs = now
+            if (delta > 3000) { // If gap > 3s, system likely resumed from suspension
+                girosurclock._enterSettling()
+            }
+        }
+    }
+
+    // Temporarily pauses updates to allow the UI to stabilize (e.g., after blur re-renders)
+    function _enterSettling() {
+        settling = true
+        settlingTimer.restart()
+    }
+
+    Timer {
+        id: settlingTimer
+        interval: 2000
+        repeat: false
+        onTriggered: {
+            // fin de la ventana: sincronizamos una vez y reanudamos
+            var d = new Date(dataSource.data["Local"]["DateTime"] || Date.now())
+            hours = d.getHours()
+            minutes = d.getMinutes()
+            seconds = d.getSeconds()
+            dateTimeChanged()
+            settling = false
+        }
+    }
+
+    // Si el item vuelve a ser visible (p.ej. cambio de sesión), también aplicamos la misma lógica
+    onVisibleChanged: if (visible) _enterSettling()
 
     Plasmoid.compactRepresentation: Item {
         id: representation
@@ -96,7 +144,7 @@ Item {
             anchors.leftMargin: plasmoid.formFactor === PlasmaCore.Types.Vertical ? plasmoid.configuration.thicknessPadding : 0
             anchors.rightMargin: plasmoid.formFactor === PlasmaCore.Types.Vertical ? plasmoid.configuration.thicknessPadding : 0
 
-            /* ================= FONDO ALINEADO AL CÍRCULO ================= */
+            /* ================= FONDO ================= */
             Item {
                 id: bgWrap
                 anchors.centerIn: clock
@@ -105,16 +153,14 @@ Item {
                 visible: plasmoid.configuration.showBackground === undefined ? true : plasmoid.configuration.showBackground
                 opacity: plasmoid.configuration.backgroundOpacity === undefined ? 0.85 : plasmoid.configuration.backgroundOpacity
                 z: -1000
-
                 Image {
                     anchors.fill: parent
                     source: plasmoid.file("images", plasmoid.configuration.backgroundSource || "fondo01.svg")
-                    fillMode: Image.PreserveAspectFit   // usar PreserveAspectCrop si querés que “llene” sin bandas
+                    fillMode: Image.PreserveAspectFit
                     antialiasing: true
                     smooth: true
                 }
             }
-            /* ============================================================= */
 
             PlasmaCore.Svg {
                 id: clockSvg
@@ -150,12 +196,10 @@ Item {
                 anchors.bottom: showTimezone ? timezoneBg.top : parent.bottom
 
                 readonly property real circleSize: Math.min(width, height)
-
                 readonly property real svgBase: clockSvg.hasElement("ClockFace")
                                                ? clockSvg.elementSize("ClockFace").width
                                                : 256
                 readonly property real svgScale: circleSize / svgBase
-
                 readonly property int horizontalShadowOffset: Math.round(clockSvg.naturalHorizontalHandShadowOffset * svgScale) + Math.round(clockSvg.naturalHorizontalHandShadowOffset * svgScale) % 2
                 readonly property int verticalShadowOffset: Math.round(clockSvg.naturalVerticalHandShadowOffset * svgScale) + Math.round(clockSvg.naturalVerticalHandShadowOffset * svgScale) % 2
 
@@ -209,7 +253,7 @@ Item {
                     svgScale: clock.svgScale
                 }
 
-                /* Centro y “Glass” (opcional del tema) */
+                /* Centro (ok) y Glass desactivado para evitar recompute de blur */
                 PlasmaCore.SvgItem {
                     id: center
                     anchors.centerIn: clock
@@ -226,7 +270,8 @@ Item {
                     height: clock.circleSize
                     svg: clockSvg
                     elementId: "Glass"
-                    visible: clockSvg.hasElement("Glass")
+                    // 🔕 Lo dejamos apagado para no forzar contraste/blur cada segundo
+                    visible: false
                 }
             }
 
@@ -239,7 +284,6 @@ Item {
                 width: childrenRect.width + margins.left + margins.right
                 height: childrenRect.height + margins.top + margins.bottom
                 visible: showTimezone
-
                 PlasmaComponents.Label {
                     id: timezoneText
                     x: timezoneBg.margins.left
