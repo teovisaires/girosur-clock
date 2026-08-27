@@ -7,7 +7,7 @@
 
   <group name="General">
     <entry name="showSecondHand" type="Bool">
-      <default>false</default>
+      <default>true</default>
     </entry>
     <entry name="showTimezoneString" type="Bool">
       <default>false</default>
@@ -23,7 +23,7 @@
         <default>true</default>
     </entry>
     <entry name="backgroundSource" type="String">
-        <default>fondo06.svg</default>
+        <default>fondo01.svg</default>
     </entry>
   </group>
 

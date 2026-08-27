@@ -1,24 +1,6 @@
 /*
- *   GiroSur Clock – counterclockwise version
- *   Reloj “GiroSur”: rotación antihoraria y numeración invertida
- *   Copyright (C) 2025 Teodoro Visaires <teovisaires@gmx.com>
- *   Based on KDE Plasma Analog Clock by:
- *   Viranch Mehta, Marco Martin, David Edmundson, Michail Vourlakos
- *
- *   SPDX-License-Identifier: GPL-2.0-or-later
- *
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 2 of the License, or
- *   (at your option) any later version.
- *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
- *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * Tick-and-bounce second hand with numerically continuous rotation.
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 import QtQuick 2.0
@@ -28,28 +10,29 @@ import QtGraphicalEffects 1.0
 PlasmaCore.SvgItem {
     id: handRoot
 
-    property alias rotation: rotation.angle
+    property alias rotation: handRotation.angle
     property double svgScale
     property double horizontalRotationOffset: 0
     property double verticalRotationOffset: 0
     property string rotationCenterHintId
+
     readonly property double horizontalRotationCenter: {
         if (svg.hasElement(rotationCenterHintId)) {
             var hintedCenterRect = svg.elementRect(rotationCenterHintId),
                 handRect = svg.elementRect(elementId),
-                hintedX = hintedCenterRect.x - handRect.x + hintedCenterRect.width/2;
+                hintedX = hintedCenterRect.x - handRect.x + hintedCenterRect.width / 2;
             return Math.round(hintedX * svgScale) + Math.round(hintedX * svgScale) % 2;
         }
-        return width/2;
+        return width / 2;
     }
     readonly property double verticalRotationCenter: {
         if (svg.hasElement(rotationCenterHintId)) {
             var hintedCenterRect = svg.elementRect(rotationCenterHintId),
                 handRect = svg.elementRect(elementId),
-                hintedY = hintedCenterRect.y - handRect.y + hintedCenterRect.height/2;
+                hintedY = hintedCenterRect.y - handRect.y + hintedCenterRect.height / 2;
             return Math.round(hintedY * svgScale) + width % 2;
         }
-        return width/2;
+        return width / 2;
     }
 
     width: Math.round(naturalSize.width * svgScale) + Math.round(naturalSize.width * svgScale) % 2
@@ -61,38 +44,36 @@ PlasmaCore.SvgItem {
         leftMargin: -horizontalRotationCenter + horizontalRotationOffset
     }
 
-    // —— ÚNICO CAMBIO: apuntar a images/clock.svg dentro del paquete ——
     svg: PlasmaCore.Svg {
-        id: localClockSvg
         imagePath: plasmoid.file("images", "clock.svg")
         multipleImages: true
     }
 
     layer.enabled: true
     layer.effect: DropShadow {
-        id: handGlow
         transparentBorder: true
-        color: Qt.rgba(1, 1, 1, 0.4) // Subtle white glow
+        color: Qt.rgba(1, 1, 1, 0.4)
         radius: 8
         samples: 16
         horizontalOffset: 0
         verticalOffset: 0
-        visible: !handRoot.elementId.includes("Shadow") // Only glow for the hands, not their shadows
+        visible: !handRoot.elementId.includes("Shadow")
     }
 
     transform: Rotation {
-        id: rotation
+        id: handRotation
         angle: 0
         origin {
             x: handRoot.horizontalRotationCenter
             y: handRoot.verticalRotationCenter
         }
+
         Behavior on angle {
             RotationAnimation {
-                id: anim
                 duration: 400
-                direction: RotationAnimation.Shortest
-                easing.type: Easing.OutCubic
+                direction: RotationAnimation.Numerical
+                easing.type: Easing.OutBack
+                easing.overshoot: 0.3
             }
         }
     }

@@ -15,7 +15,7 @@ X-Plasma-Provides=org.kde.plasma.time,org.kde.plasma.date
 X-Plasma-StandAloneApp=true
 
 X-KDE-PluginInfo-Name=org.girosur.clock
-X-KDE-PluginInfo-Version=1.0.0
+X-KDE-PluginInfo-Version=1.0.2
 X-KDE-PluginInfo-Author=Teodoro Visaires
 X-KDE-PluginInfo-Email=teovisaires@gmx.com
 X-KDE-PluginInfo-License=GPL-2.0-or-later
@@ -28,4 +28,3 @@ X-KDE-Keywords[es]=reloj;analógico;hora;antihorario;girosur;sur arriba;
 
 [X-Plasma-ConfigDialog]
 InitialPage=Appearance
-

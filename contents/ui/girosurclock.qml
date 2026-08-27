@@ -38,9 +38,30 @@ Item {
     property int hours
     property int minutes
     property int seconds
-    property bool showSecondsHand: plasmoid.configuration.showSecondHand
+    property real secondRotation: 180
+    property bool secondRotationInitialized: false
+    property bool showSecondsHand: plasmoid.configuration.showSecondHand === undefined
+                                   ? true
+                                   : plasmoid.configuration.showSecondHand
     property bool showTimezone: plasmoid.configuration.showTimezoneString
     property int tzOffset
+
+    // Keep the second-hand target numerically continuous through 59 -> 0.
+    // At midnight/top-of-minute it advances from -174 to -180 instead of
+    // resetting to +180, so the bounce animation never takes a long detour.
+    function updateSecondRotation(second) {
+        var target = 180 - second * 6
+
+        if (!secondRotationInitialized) {
+            secondRotation = target
+            secondRotationInitialized = true
+            return
+        }
+
+        while (target > secondRotation) target -= 360
+        while (target <= secondRotation - 360) target += 360
+        secondRotation = target
+    }
 
     // ---- System State & Stabilization ----
     // Used to prevent visual glitches after system suspension or session changes.
@@ -68,6 +89,7 @@ Item {
             hours = date.getHours()
             minutes = date.getMinutes()
             seconds = date.getSeconds()
+            updateSecondRotation(seconds)
         }
         Component.onCompleted: onDataChanged()
     }
@@ -118,6 +140,7 @@ Item {
             hours = d.getHours()
             minutes = d.getMinutes()
             seconds = d.getSeconds()
+            updateSecondRotation(seconds)
             dateTimeChanged()
             settling = false
         }
@@ -236,19 +259,19 @@ Item {
                 }
 
                 /* ── Aguja de segundos y sombra (antihorario) ── */
-                Hand {
+                BouncySecondHand {
                     elementId: "SecondHandShadow"
                     rotationCenterHintId: "hint-secondhandshadow-rotation-center-offset"
                     horizontalRotationOffset: clock.horizontalShadowOffset
                     verticalRotationOffset: clock.verticalShadowOffset
-                    rotation: 180 - seconds * 6
+                    rotation: girosurclock.secondRotation
                     visible: showSecondsHand
                     svgScale: clock.svgScale
                 }
-                Hand {
+                BouncySecondHand {
                     elementId: "SecondHand"
                     rotationCenterHintId: "hint-secondhand-rotation-center-offset"
-                    rotation: 180 - seconds * 6
+                    rotation: girosurclock.secondRotation
                     visible: showSecondsHand
                     svgScale: clock.svgScale
                 }
